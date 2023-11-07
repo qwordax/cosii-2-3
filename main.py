@@ -57,7 +57,7 @@ def main():
 
     cv.imshow('Initial Image', image)
 
-    # Waiting for user.
+    # Wait for user.
     cv.waitKey(0)
 
     sys.exit(0)
