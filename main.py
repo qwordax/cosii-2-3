@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 
+import os
 import sys
 
 def convolve(a, b):
@@ -52,6 +53,10 @@ def main():
     The main function of the program.
     '''
     path = input('path: ')
+
+    if not os.path.exists(path):
+        print(f'error: \'{path}\' does not exists', file=sys.stderr)
+        sys.exit(1)
 
     image = cv.imread(path, cv.IMREAD_UNCHANGED)
 
