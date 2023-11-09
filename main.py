@@ -4,31 +4,6 @@ import numpy as np
 import os
 import sys
 
-def convolve(a, b):
-    '''
-    Computes convolution between `a` and `b` matrices where `b` represents a
-    convolution kernel.
-    '''
-    result = a.copy()
-
-    # Represents a pad width.
-    width = (b.shape[0]-1) // 2
-
-    pad = np.zeros((a.shape[0] + 2*width, a.shape[1] + 2*width))
-
-    # Pad the `a` matrix.
-    pad[width:-width, width:-width] = a
-
-    for i in range(a.shape[0]):
-        for j in range(a.shape[1]):
-            prod = np.multiply(pad[i:i + 2*width + 1,
-                                   j:j + 2*width + 1], b)
-
-            # Apply sum of the products.
-            result[i, j] = np.sum(prod)
-
-    return result
-
 def mother_wavelet(t):
     '''
     Represents the mother wavelet with `t` parameter.
