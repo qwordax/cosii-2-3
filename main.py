@@ -9,11 +9,17 @@ SIZE = (512, 512)
 Specifies the size to show an image.
 '''
 
-def wavelet(t):
+def wavelet(x):
     '''
-    Represents the mother wavelet with `t` parameter.
+    Represents the mother wavelet with `x` parameter.
     '''
-    return np.exp(-t*t / 2) - 0.5*np.exp(-t*t / 8)
+    return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
+
+def scale(x):
+    '''
+    Represents the scale function of the mother wavelet with `x` parameter.
+    '''
+    return np.sqrt(2*np.pi) * (np.exp(-x*x / 2) - np.exp(-2*x*x))
 
 def wavelet_transform(image):
     '''
