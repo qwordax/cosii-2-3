@@ -15,12 +15,6 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
-def scale(x):
-    '''
-    Represents the scale function of the mother wavelet with `x` parameter.
-    '''
-    return np.sqrt(2*np.pi) * (np.exp(-x*x / 2) - np.exp(-2*x*x))
-
 def wavelet_transform(image):
     '''
     Performs the wavelet transform of an `image`.
