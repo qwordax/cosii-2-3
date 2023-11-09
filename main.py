@@ -4,9 +4,9 @@ import numpy as np
 import os
 import sys
 
-SIZE = (512, 512)
+HEIGHT = 500
 '''
-Specifies the size to show an image.
+Specifies the height of the image to show.
 '''
 
 def wavelet(x):
@@ -15,13 +15,11 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
-def wavelet_transform(image):
+def wavelet_transform(data):
     '''
-    Performs the wavelet transform of an `image`.
+    Performs the wavelet transform of the `data`.
     '''
-    result = image.copy()
-
-    return result
+    pass
 
 def main():
     '''
@@ -35,27 +33,23 @@ def main():
 
     image = cv.imread(path, cv.IMREAD_COLOR)
 
+    # The size of the image to show.
+    size = (int(HEIGHT * image.shape[1]/image.shape[0]), HEIGHT)
+
     level = int(input('level: '))
 
     for l in range(level):
         print(f'scale = {4 ** (l+1)}')
 
         cv.imshow(f'Initial {l+1}', cv.resize(
-            image, SIZE,
+            image, size,
             cv.INTER_NEAREST
         ))
 
         result = image.copy()
 
-        # Transform.
-        for c in range(image.shape[0]):
-            result[c] = wavelet_transform(image[c])
-
-        # Obtain the approximation coefficient.
-        image = result[:result.shape[0]//2, :result.shape[1]//2, :]
-
         cv.imshow(f'Transform {l+1}', cv.resize(
-            result, SIZE,
+            result, size,
             cv.INTER_NEAREST
         ))
 
