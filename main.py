@@ -15,6 +15,18 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
+def low_pass_filter(data):
+    '''
+    Represents the low pass filter based on the mother wavelet.
+    '''
+    pass
+
+def high_pass_filter(data):
+    '''
+    Represents the high pass filter based on the mother wavelet.
+    '''
+    pass
+
 def wavelet_transform(data):
     '''
     Performs the wavelet transform of the `data`.
