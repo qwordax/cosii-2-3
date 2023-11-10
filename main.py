@@ -15,17 +15,31 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
+def kernel(n):
+    '''
+    Returns the filter kernel with even `n` parameter.
+    '''
+    result = np.zeros((n, n))
+
+    for i in np.arange(n // 2):
+        result[i, 2*i] = 1
+        result[i, 2*i + 1] = 1
+        result[i + n//2, 2*i] = 1
+        result[i + n//2, 2*i + 1] = -1
+
+    return result
+
 def low_pass_filter(data):
     '''
     Represents the low pass filter based on the mother wavelet.
     '''
-    return data[:, 0::2].copy()
+    return data[:, ::2].copy()
 
 def high_pass_filter(data):
     '''
     Represents the high pass filter based on the mother wavelet.
     '''
-    return data[:, 1::2].copy()
+    return data[:, ::2].copy()
 
 def wavelet_transform(data):
     '''
