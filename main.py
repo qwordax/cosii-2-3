@@ -15,61 +15,40 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
-def kernel(n):
+def low_pass(n):
     '''
-    Returns the filter kernel with even `n` parameter.
+    Returns the low pass filter kernel with even `n` parameter.
     '''
-    result = np.zeros((n, n))
+    result = np.zeros((n // 2, n))
 
     for i in np.arange(n // 2):
         result[i, 2*i] = 1
         result[i, 2*i + 1] = 1
-        result[i + n//2, 2*i] = 1
-        result[i + n//2, 2*i + 1] = -1
 
-    return result
+    return 1/np.sqrt(2) * result
 
-def low_pass_filter(data):
+def high_pass(n):
     '''
-    Represents the low pass filter based on the mother wavelet.
+    Returns the high pass filter kernel with even `n` parameter.
     '''
-    return data[:, ::2].copy()
+    result = np.zeros((n // 2, n))
 
-def high_pass_filter(data):
-    '''
-    Represents the high pass filter based on the mother wavelet.
-    '''
-    return data[:, ::2].copy()
+    for i in np.arange(n // 2):
+        result[i, 2*i] = -1
+        result[i, 2*i + 1] = 1
+
+    return 1/np.sqrt(2) * result
 
 def wavelet_transform(data):
     '''
     Performs the wavelet transform of the `data`.
     '''
-    coeff_a = list()
-    coeff_h = list()
-    coeff_v = list()
-    coeff_d = list()
+    a = data.copy()
+    h = data.copy()
+    v = data.copy()
+    d = data.copy()
 
-    for c in np.arange(data.shape[2]):
-        approx = low_pass_filter(data[:, :, c])
-        detail = high_pass_filter(data[:, :, c])
-
-        a = low_pass_filter(approx.T).T
-        h = low_pass_filter(detail.T).T
-        v = high_pass_filter(approx.T).T
-        d = high_pass_filter(detail.T).T
-
-        coeff_a.append(a.reshape(a.shape[0], a.shape[1], 1))
-        coeff_h.append(h.reshape(h.shape[0], h.shape[1], 1))
-        coeff_v.append(v.reshape(v.shape[0], v.shape[1], 1))
-        coeff_d.append(d.reshape(d.shape[0], d.shape[1], 1))
-
-    return (
-        np.concatenate(coeff_a, axis=2),
-        np.concatenate(coeff_h, axis=2),
-        np.concatenate(coeff_v, axis=2),
-        np.concatenate(coeff_d, axis=2)
-    )
+    return a, h, v, d
 
 def main():
     '''
@@ -81,7 +60,7 @@ def main():
         print(f'error: \'{path}\' does not exists', file=sys.stderr)
         sys.exit(1)
 
-    image = cv.imread(path, cv.IMREAD_COLOR)
+    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
 
     # The size of the image to show.
     size = (int(HEIGHT * image.shape[1]/image.shape[0]), HEIGHT)
@@ -100,25 +79,25 @@ def main():
         ))
 
         # Transform the image.
-        coeff_a, coeff_h, coeff_v, coeff_d = wavelet_transform(image)
+        a, h, v, d = wavelet_transform(image)
 
         cv.imshow(f'Approximation {l+1}', cv.resize(
-            coeff_a, coeff_size,
+            a, coeff_size,
             cv.INTER_NEAREST
         ))
 
         cv.imshow(f'Horizontal {l+1}', cv.resize(
-            coeff_h, coeff_size,
+            h, coeff_size,
             cv.INTER_NEAREST
         ))
 
         cv.imshow(f'Vertical {l+1}', cv.resize(
-            coeff_v, coeff_size,
+            v, coeff_size,
             cv.INTER_NEAREST
         ))
 
         cv.imshow(f'Diagonal {l+1}', cv.resize(
-            coeff_d, coeff_size,
+            d, coeff_size,
             cv.INTER_NEAREST
         ))
 
@@ -127,7 +106,7 @@ def main():
         cv.destroyAllWindows()
 
         # Update the image for the next iteration.
-        image = coeff_a
+        image = a
 
     sys.exit(0)
 
