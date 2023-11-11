@@ -43,12 +43,21 @@ def wavelet_transform(data):
     '''
     Performs the wavelet transform of the `data`.
     '''
-    a = data.copy()
-    h = data.copy()
-    v = data.copy()
-    d = data.copy()
+    if data.shape[0] % 2:
+        data = np.concatenate((data, np.array([data[-1, :]])), axis=0)
 
-    return a, h, v, d
+    if data.shape[1] % 2:
+        data = np.concatenate((data, np.array([data[:, -1]]).T), axis=1)
+
+    approx = np.dot(data, low_pass(data.shape[1]).T)
+    detail = np.dot(data, high_pass(data.shape[1]).T)
+
+    a = np.dot(low_pass(approx.shape[0]), approx)
+    h = np.dot(high_pass(approx.shape[0]), approx)
+    v = np.dot(low_pass(detail.shape[0]), detail)
+    d = np.dot(high_pass(detail.shape[0]), detail)
+
+    return np.uint8(a), np.uint8(h), np.uint8(v), np.uint8(d)
 
 def main():
     '''
@@ -71,8 +80,6 @@ def main():
     level = int(input('level: '))
 
     for l in np.arange(level):
-        print(f'scale = {4 ** (l+1)}')
-
         cv.imshow(f'Initial {l+1}', cv.resize(
             image, size,
             cv.INTER_NEAREST
@@ -100,6 +107,8 @@ def main():
             d, coeff_size,
             cv.INTER_NEAREST
         ))
+
+        print(f'scale = {4 ** (l+1)}')
 
         # Wait for user.
         cv.waitKey(0)
