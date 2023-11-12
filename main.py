@@ -4,6 +4,11 @@ import numpy as np
 import os
 import sys
 
+TAU = 1.0
+'''
+Specifies the offset of the wavelet transform.
+'''
+
 HEIGHT = 500
 '''
 Specifies the height of the image to show.
@@ -22,8 +27,8 @@ def low_pass(n):
     result = np.zeros((n // 2, n))
 
     for i in np.arange(n // 2):
-        result[i, 2*i] = 1
-        result[i, 2*i + 1] = 1
+        result[i, 2*i] = wavelet(-TAU / 2.0)
+        result[i, 2*i + 1] = wavelet(TAU / 2.0)
 
     return 1/np.sqrt(2) * result
 
@@ -34,8 +39,8 @@ def high_pass(n):
     result = np.zeros((n // 2, n))
 
     for i in np.arange(n // 2):
-        result[i, 2*i] = 1
-        result[i, 2*i + 1] = -1
+        result[i, 2*i] = wavelet(-TAU / 2.0)
+        result[i, 2*i + 1] = -wavelet(TAU / 2.0)
 
     return 1/np.sqrt(2) * result
 
