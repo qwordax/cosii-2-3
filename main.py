@@ -59,6 +59,11 @@ def wavelet_transform(data):
 
     # Normalize coefficients.
     a = a / np.max(a) * 255.0
+
+    h = np.abs(h)
+    v = np.abs(v)
+    d = np.abs(d)
+
     h = h / np.max(h) * 255.0
     v = v / np.max(v) * 255.0
     d = d / np.max(d) * 255.0
@@ -86,15 +91,33 @@ def main():
     level = int(input('level: '))
 
     for l in np.arange(level):
-        cv.imshow(f'Initial {l+1}', cv.resize(image, size))
+        cv.imshow(f'Initial {l+1}', cv.resize(
+            image, size,
+            interpolation=cv.INTER_NEAREST
+        ))
 
         # Transform the image.
         a, h, v, d = wavelet_transform(image)
 
-        cv.imshow(f'Approximation {l+1}', cv.resize(a, coeff_size))
-        cv.imshow(f'Horizontal {l+1}', cv.resize(h, coeff_size))
-        cv.imshow(f'Vertical {l+1}', cv.resize(v, coeff_size))
-        cv.imshow(f'Diagonal {l+1}', cv.resize(d, coeff_size))
+        cv.imshow(f'Approximation {l+1}', cv.resize(
+            a, coeff_size,
+            interpolation=cv.INTER_NEAREST
+        ))
+
+        cv.imshow(f'Horizontal {l+1}', cv.resize(
+            h, coeff_size,
+            interpolation=cv.INTER_NEAREST
+        ))
+
+        cv.imshow(f'Vertical {l+1}', cv.resize(
+            v, coeff_size,
+            interpolation=cv.INTER_NEAREST
+        ))
+
+        cv.imshow(f'Diagonal {l+1}', cv.resize(
+            d, coeff_size,
+            interpolation=cv.INTER_NEAREST
+        ))
 
         print(f'scale = {4 ** (l+1)}')
 
