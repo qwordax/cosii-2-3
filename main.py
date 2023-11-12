@@ -9,7 +9,7 @@ TAU = 1.0
 Specifies the offset of the wavelet transform.
 '''
 
-HEIGHT = 500
+HEIGHT = 700
 '''
 Specifies the height of the image to show.
 '''
@@ -44,36 +44,82 @@ def high_pass_kernel(n):
 
     return 1/np.sqrt(2) * result
 
-def wavelet_transform(data):
+def wavelet_transform(image):
     '''
-    Performs the wavelet transform of the `data`.
+    Performs the wavelet transform of the `image`.
     '''
-    if data.shape[0] % 2:
-        data = np.concatenate((data, np.array([data[-1, :]])), axis=0)
+    if image.shape[0] % 2:
+        comps = []
 
-    if data.shape[1] % 2:
-        data = np.concatenate((data, np.array([data[:, -1]]).T), axis=1)
+        for k in np.arange(image.shape[2]):
+            comp = image[:, :, k]
 
-    approx = np.dot(data, low_pass_kernel(data.shape[1]).T)
-    detail = np.dot(data, high_pass_kernel(data.shape[1]).T)
+            # Add extra row.
+            comp = np.concatenate((
+                comp,
+                np.array([comp[-1, :]])
+            ), axis=0)
 
-    a = np.dot(low_pass_kernel(approx.shape[0]), approx)
-    h = np.dot(high_pass_kernel(approx.shape[0]), approx)
-    v = np.dot(low_pass_kernel(detail.shape[0]), detail)
-    d = np.dot(high_pass_kernel(detail.shape[0]), detail)
+            comps.append(comp.reshape((comp.shape[0], comp.shape[1], 1)))
 
-    # Get rid of negative values.
-    h = np.abs(h)
-    v = np.abs(v)
-    d = np.abs(d)
+        # Combine components.
+        image = np.concatenate(comps, axis=2)
 
-    # Normalize coefficients.
-    a = a / np.max(a) * 255.0
-    h = h / np.max(h) * 255.0
-    v = v / np.max(v) * 255.0
-    d = d / np.max(d) * 255.0
+    if image.shape[1] % 2:
+        comps = []
 
-    return np.uint8(a), np.uint8(h), np.uint8(v), np.uint8(d)
+        for k in np.arange(image.shape[2]):
+            comp = image[:, :, k]
+
+            # Add extra column.
+            comp = np.concatenate((
+                comp,
+                np.array([comp[:, -1]]).T
+            ), axis=1)
+
+            comps.append(comp.reshape((comp.shape[0], comp.shape[1], 1)))
+
+        # Combine components.
+        image = np.concatenate(comps, axis=2)
+
+    # Result coefficients.
+    coeff_a = []
+    coeff_h = []
+    coeff_v = []
+    coeff_d = []
+
+    for k in np.arange(image.shape[2]):
+        approx = np.dot(image[:, :, k], low_pass_kernel(image.shape[1]).T)
+        detail = np.dot(image[:, :, k], high_pass_kernel(image.shape[1]).T)
+
+        a = np.dot(low_pass_kernel(approx.shape[0]), approx)
+        h = np.dot(high_pass_kernel(approx.shape[0]), approx)
+        v = np.dot(low_pass_kernel(detail.shape[0]), detail)
+        d = np.dot(high_pass_kernel(detail.shape[0]), detail)
+
+        # Get rid of negative values.
+        h = np.abs(h)
+        v = np.abs(v)
+        d = np.abs(d)
+
+        # Normalize coefficients.
+        a = np.uint8(a / np.max(a) * 255.0)
+        h = np.uint8(h / np.max(h) * 255.0)
+        v = np.uint8(v / np.max(v) * 255.0)
+        d = np.uint8(d / np.max(d) * 255.0)
+
+        coeff_a.append(a.reshape((a.shape[0], a.shape[1], 1)))
+        coeff_h.append(h.reshape((h.shape[0], h.shape[1], 1)))
+        coeff_v.append(v.reshape((v.shape[0], v.shape[1], 1)))
+        coeff_d.append(d.reshape((d.shape[0], d.shape[1], 1)))
+
+    # Combine components.
+    a = np.concatenate(coeff_a, axis=2)
+    h = np.concatenate(coeff_h, axis=2)
+    v = np.concatenate(coeff_v, axis=2)
+    d = np.concatenate(coeff_d, axis=2)
+
+    return a, h, v, d
 
 def main():
     '''
@@ -85,7 +131,7 @@ def main():
         print(f'error: \'{path}\' does not exists', file=sys.stderr)
         sys.exit(1)
 
-    image = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    image = cv.imread(path, cv.IMREAD_COLOR)
 
     # The size of the image to show.
     size = (int(HEIGHT * image.shape[1]/image.shape[0]), HEIGHT)
