@@ -20,7 +20,7 @@ def wavelet(x):
     '''
     return np.exp(-x*x / 2) - 0.5*np.exp(-x*x / 8)
 
-def low_pass(n):
+def low_pass_kernel(n):
     '''
     Returns the low pass filter kernel with even `n` parameter.
     '''
@@ -32,7 +32,7 @@ def low_pass(n):
 
     return 1/np.sqrt(2) * result
 
-def high_pass(n):
+def high_pass_kernel(n):
     '''
     Returns the high pass filter kernel with even `n` parameter.
     '''
@@ -54,21 +54,21 @@ def wavelet_transform(data):
     if data.shape[1] % 2:
         data = np.concatenate((data, np.array([data[:, -1]]).T), axis=1)
 
-    approx = np.dot(data, low_pass(data.shape[1]).T)
-    detail = np.dot(data, high_pass(data.shape[1]).T)
+    approx = np.dot(data, low_pass_kernel(data.shape[1]).T)
+    detail = np.dot(data, high_pass_kernel(data.shape[1]).T)
 
-    a = np.dot(low_pass(approx.shape[0]), approx)
-    h = np.dot(high_pass(approx.shape[0]), approx)
-    v = np.dot(low_pass(detail.shape[0]), detail)
-    d = np.dot(high_pass(detail.shape[0]), detail)
+    a = np.dot(low_pass_kernel(approx.shape[0]), approx)
+    h = np.dot(high_pass_kernel(approx.shape[0]), approx)
+    v = np.dot(low_pass_kernel(detail.shape[0]), detail)
+    d = np.dot(high_pass_kernel(detail.shape[0]), detail)
 
-    # Normalize coefficients.
-    a = a / np.max(a) * 255.0
-
+    # Get rid of negative values.
     h = np.abs(h)
     v = np.abs(v)
     d = np.abs(d)
 
+    # Normalize coefficients.
+    a = a / np.max(a) * 255.0
     h = h / np.max(h) * 255.0
     v = v / np.max(v) * 255.0
     d = d / np.max(d) * 255.0
